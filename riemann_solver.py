@@ -15,6 +15,10 @@ class RiemannSolver(Solver):
         self._u_mean = (u_left + u_right) / 2
     
     @abc.abstractmethod
+    def eval_f_scalar_at(self, x_scalar, t_scalar):
+        pass
+
+    @abc.abstractmethod
     def eval_u_scalar_at(self, x_scalar, t_scalar):
         pass
 
@@ -36,6 +40,9 @@ class Linear(RiemannSolver):
 
     def __init__(self, a):
         self._a = a
+
+    def eval_f_scalar_at(self, x_scalar, t_scalar):
+        return self._a * self.eval_u_scalar_at(x_scalar, t_scalar)
 
     def eval_u_scalar_at(self, x_scalar, t_scalar):
         x_0 = x_scalar - self._a * t_scalar
@@ -86,6 +93,10 @@ class Burgers(RiemannSolver):
             else:
                 u = slope
         return u
+
+    def eval_f_scalar_at(self, x_scalar, t_scalar):
+        u = self.eval_u_scalar_at(x_scalar, t_scalar)
+        return u**2 / 2
 
     def eval_u_scalar_at(self, x_scalar, t_scalar):
         if self._u_left >= self._u_right:
