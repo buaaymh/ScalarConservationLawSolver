@@ -9,19 +9,23 @@ class TimeScheme(abc.ABC):
     def get_u_new(self, u_old, dt):
         pass
 
+    def set_rhs_func(self, rhs_func):
+        self._rhs = rhs_func
+
 
 class OneStepRungeKutta(TimeScheme):
     
-    def __init__(self, rhs_func):
-        self._rhs = rhs_func
+    def __init__(self):
+        pass
 
     def get_u_new(self, u_old, dt):
         return u_old + dt * self._rhs(u_old)
 
 
 class ThreeStepRungeKutta(TimeScheme):
-    def __init__(self, rhs_func):
-        self._rhs = rhs_func
+    
+    def __init__(self):
+        pass
 
     def get_u_new(self, u_old, dt):
         u_1 = u_old + dt * self._rhs(u_old)
@@ -37,10 +41,13 @@ if __name__ == '__main__':
     def rhs(u_vec):
         return np.exp(-u_vec)
 
-    t_marcher = OneStepRungeKutta(rhs_func=rhs)
+    t_marcher = OneStepRungeKutta()
+    t_marcher.set_rhs_func(rhs_func=rhs)
     u_new = t_marcher.get_u_new(u_old=u_0_vec, dt=dt)
     print(u_new)
-    t_marcher = ThreeStepRungeKutta(rhs_func=rhs)
+    
+    t_marcher = ThreeStepRungeKutta()
+    t_marcher.set_rhs_func(rhs_func=rhs)
     u_new = t_marcher.get_u_new(u_old=u_0_vec, dt=dt)
     print(u_new)
 
