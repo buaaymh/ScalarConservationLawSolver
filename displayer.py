@@ -2,6 +2,7 @@ import abc
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm as colormap
+from matplotlib.animation import FuncAnimation
 
 
 class Displayer(abc.ABC):
@@ -58,16 +59,44 @@ class ContourDisplayer(Displayer):
 class AnimationDisplayer(Displayer):
 
     def __init__(self, x_vec, t_vec, u_mat):
-        pass
+        assert len(t_vec) == len(u_mat)
+        assert len(x_vec) == len(u_mat[0])
+        assert sorted(x_vec)
+        assert sorted(t_vec)
+        self._x_vec = x_vec
+        self._t_vec = t_vec
+        self._u_mat = u_mat
 
     def display(self, x_min=0.0, x_max=1.0, t_min=0.0, t_max=1.0):
-        pass
+        x_data, t_data, u_data = self._extract_data(
+            x_vec=self._x_vec, x_min=x_min, x_max=x_max,
+            t_vec=self._t_vec, t_min=t_min, t_max=t_max, u_mat=self._u_mat)
+        fig, ax = plt.subplots()
+        ln, = ax.plot([], [], 'r-', animated=False)
 
+        def init():
+            ax.set_xlim(x_min, x_max)
+            ax.set_ylim(-1.0, 2.0)
+            ax.set_xlabel("x")
+            ax.set_ylabel("u")
+            ax.grid(True)
+            return ln,
+
+        def update(n):
+            ti = "t = {0}". format(t_data[n])
+            ax.set_title(ti)
+            ax.figure.canvas.draw()
+            ln.set_data(x_data, u_data[n])
+            return ln,
+        
+        animation = FuncAnimation(fig, update, frames=np.arange(0,len(t_data)),
+                      init_func=init, blit=True, repeat=False, interval=20)
+        plt.show()
 
 if __name__ == '__main__':
     c = 1.0
-    x_vec = np.linspace(start=0.0, stop=1.0, num=11)
-    t_vec = np.linspace(start=0.0, stop=1.0, num=11)
+    x_vec = np.linspace(start=0.0, stop=5.0, num=101)
+    t_vec = np.linspace(start=0.0, stop=1.0, num=50)
     u_mat = np.zeros((len(t_vec), len(x_vec)))
     u_0 = lambda x: np.sin(x)
     for i in range(len(t_vec)):
@@ -80,5 +109,5 @@ if __name__ == '__main__':
     d.display()
 
     d = AnimationDisplayer(x_vec=x_vec, t_vec=t_vec, u_mat=u_mat)
-    d.display(x_min=0.0, x_max=1.0, t_min=0.45, t_max=0.55)
+    d.display(x_min=0.0, x_max=5.0, t_min=0.0, t_max=1.0)
     d.display()
