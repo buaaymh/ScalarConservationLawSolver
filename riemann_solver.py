@@ -15,9 +15,10 @@ class RiemannSolver(Solver):
         self._u_mean = (u_left + u_right) / 2
 
     def eval_flux_on_t_axis(self, u_left, u_right):
+        # flux is always unique on t-axis
         self.set_initial(u_left=u_left, u_right=u_right)
         u_on_t_axis = self.eval_u_scalar_at(x_scalar=0.0, t_scalar=1.0)
-        self._flux(u_on_t_axis)
+        return self._flux(u_on_t_axis)
 
     @abc.abstractmethod
     def _flux(self, u):
