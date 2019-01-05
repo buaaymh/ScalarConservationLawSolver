@@ -72,25 +72,25 @@ class AnimationDisplayer(Displayer):
             x_vec=self._x_vec, x_min=x_min, x_max=x_max,
             t_vec=self._t_vec, t_min=t_min, t_max=t_max, u_mat=self._u_mat)
         fig, ax = plt.subplots()
-        ln, = ax.plot([], [], 'r-', animated=False)
+        ln, = ax.plot([], [], 'r.', animated=False)
 
         def init():
             ax.set_xlim(x_min, x_max)
-            ax.set_ylim(-1.0, 2.0)
+            ax.set_ylim(-2.0, 2.0)
             ax.set_xlabel("x")
             ax.set_ylabel("u")
             ax.grid(True)
             return ln,
 
         def update(n):
-            ti = "t = {0}". format(t_data[n])
+            ti = "t = {0:.2f}". format(t_data[n])
             ax.set_title(ti)
             ax.figure.canvas.draw()
             ln.set_data(x_data, u_data[n])
             return ln,
         
         animation = FuncAnimation(fig, update, frames=np.arange(0,len(t_data)),
-                      init_func=init, blit=True, repeat=False, interval=20)
+            init_func=init, blit=True, repeat=False, interval=20)
         plt.show()
 
 if __name__ == '__main__':
