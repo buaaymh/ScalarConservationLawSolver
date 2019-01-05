@@ -45,3 +45,27 @@ class RoeFlux(NumericalFlux):
                 f_correction = 0.0
             flux_roe[i-1] = (f_left + f_right - f_correction) / 2
         return flux_roe
+
+
+class FirstOrderUpwindFlux(NumericalFlux):
+
+    def __init__(self, flux_func, a_func):
+        self._flux_func = flux_func
+        self._a_func = a_func
+
+    def eval_flux_vec(self, u_vec):
+        a_node = np.zeros(len(u_vec))
+        flux_on_nodes = np.zeros(len(u_vec))
+        flux_upwind = np.zeros(len(u_vec))
+        for i in range(len(u_vec)):
+            flux_on_nodes[i] = self._flux_func(u_vec[i])
+            a_node[i] = self._a_func(u_vec[i])
+        for i in range(len(u_vec)):
+            i -= 1
+            if a_node[i] > 0 and a_node[i] > 0:
+                flux_upwind[i] = flux_on_nodes[i]
+            elif a_node[i] < 0 and a_node[i] < 0:
+                flux_upwind[i] = flux_on_nodes[i+1]
+            else:
+                flux_upwind[i] = 0
+        return flux_upwind
