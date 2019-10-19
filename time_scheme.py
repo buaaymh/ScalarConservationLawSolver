@@ -21,6 +21,15 @@ class OneStepRungeKutta(TimeScheme):
     def get_u_new(self, u_old, dt):
         return u_old + dt * self._rhs(u_old)
 
+class TwoStepRungeKutta(TimeScheme):
+    
+    def __init__(self):
+        pass
+
+    def get_u_new(self, u_old, dt):
+        u_1 = u_old + dt * self._rhs(u_old)
+        u_new = 0.5 * u_old + 0.5 * u_1 + 0.5 * dt * self._rhs(u_1)
+        return u_new
 
 class ThreeStepRungeKutta(TimeScheme):
     
