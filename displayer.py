@@ -76,7 +76,7 @@ class AnimationDisplayer(Displayer):
 
         def init():
             ax.set_xlim(x_min, x_max)
-            ax.set_ylim(-2.0, 2.0)
+            ax.set_ylim(-5.0, 5.0)
             ax.set_xlabel("x")
             ax.set_ylabel("u")
             ax.grid(True)
@@ -90,7 +90,7 @@ class AnimationDisplayer(Displayer):
             return ln,
         
         animation = FuncAnimation(fig, update, frames=np.arange(0,len(t_data)),
-            init_func=init, blit=True, repeat=False, interval=20)
+            init_func=init, blit=True, repeat=True, interval=50)
         plt.show()
 
 if __name__ == '__main__':
