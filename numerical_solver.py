@@ -4,7 +4,6 @@ import numpy as np
 from solver import Solver
 
 
-
 class NumericalSolver(Solver):
 
     @abc.abstractmethod
@@ -86,24 +85,14 @@ class FluxBasedSolver(NumericalSolver):
 
 if __name__ == '__main__':
     num_solver = FluxBasedSolver()
-
-    def initial(x):
-      if np.abs(x) < 0.5:
-        return 1.0
-      else:
-        return -1.0
-
-    # num_solver.set_u_0(u_0_func=lambda x: 0.5 + 1.0*np.sin(2.0*np.pi*x))
-    num_solver.set_u_0(u_0_func=lambda x: initial(x))
     
-    # num_solver.set_u_0(u_0_func=lambda x: x - np.abs(x))
-    # num_solver.set_u_0(u_0_func=lambda x: 0.2)
+    num_solver.set_u_0(u_0_func=lambda x: 0.0-1.0*np.sin(np.pi*x))
 
     # Choose Numerical Flux
     from numerical_flux import GodunovFlux
     import riemann_solver
-    flux = GodunovFlux(riemann_solver.Linear(a=3.0))
-    # flux = GodunovFlux(riemann_solver.Burgers())
+    # flux = GodunovFlux(riemann_solver.Linear(a=-1.0))
+    flux = GodunovFlux(riemann_solver.Burgers())
 
     from numerical_flux import RoeFlux
     # flux = RoeFlux(flux_func=lambda x: x**2/2)
@@ -143,7 +132,6 @@ if __name__ == '__main__':
     x_vec = np.linspace(start=-1.0, stop=1.0, num=51)
     t_vec = np.linspace(start=t_min, stop=t_max, num=1+t_num)
     u_mat = num_solver.eval_u_matrix_at(x_vec=x_vec, t_vec=t_vec)
-    from displayer import ContourDisplayer, AnimationDisplayer
-    d_animation = AnimationDisplayer(x_vec=x_vec, t_vec=t_vec, u_mat=u_mat)
-    d_animation.display(x_min=-1.0, x_max=1.0, t_min=t_min, t_max=t_max)
-    
+    from displayer import ContourDisplayer, AnimationDisplayer, VtkDisplayer
+    displayer = VtkDisplayer(x_vec=x_vec, t_vec=t_vec, u_mat=u_mat)
+    displayer.display(x_min=-1.0, x_max=1.0, t_min=t_min, t_max=t_max)
