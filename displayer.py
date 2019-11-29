@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm as colormap
 from matplotlib.animation import FuncAnimation
+import os
 
 
 class Displayer(abc.ABC):
@@ -93,10 +94,51 @@ class AnimationDisplayer(Displayer):
             init_func=init, blit=True, repeat=False, interval=20)
         plt.show()
 
+
+class VtkDisplayer(Displayer):
+
+    def __init__(self, x_vec, t_vec, u_mat, filename='u'):
+        assert len(t_vec) == len(u_mat)
+        assert len(x_vec) == len(u_mat[0])
+        assert sorted(x_vec)
+        assert sorted(t_vec)
+        self._x_vec = x_vec
+        self._t_vec = t_vec
+        self._u_mat = u_mat
+        self._filename = filename
+
+    def display(self, x_min=-1.0, x_max=1.0, t_min=0.0, t_max=1.0):
+        x_data, t_data, u_data = self._extract_data(
+            x_vec=self._x_vec, x_min=x_min, x_max=x_max,
+            t_vec=self._t_vec, t_min=t_min, t_max=t_max, u_mat=self._u_mat)
+        for i in range(len(t_data)):
+            t = t_data[i]
+            with open(self._filename+"{0}.vtk".format(i), mode='w') as f:
+                # file info
+                f.write("# vtk DataFile Version 3.0\n")
+                f.write("t = {0:.2f}\n".format(t))
+                f.write("ASCII\n")
+                # geometry
+                f.write("DATASET STRUCTURED_GRID\n")
+                f.write("DIMENSIONS {0} 1 1\n".format(len(x_data)))
+                f.write("POINTS {0} float\n".format(len(x_data)))
+                for x in x_data:
+                    f.write("{0} 0.0 0.0\n".format(x))
+                # attributes
+                f.write("POINT_DATA {0}".format(len(x_data)))
+                f.write("SCALARS u float 1\n")
+                f.write("LOOKUP_TABLE values\n")
+                u_vec = u_data[i]
+                for u in u_vec:
+                    f.write("{0}\n".format(u))
+            assert f.closed
+        print('Data written to ' + os.path.abspath('.') + '/*.vtk(s).')
+
+
 if __name__ == '__main__':
     c = 1.0
     x_vec = np.linspace(start=0.0, stop=5.0, num=101)
-    t_vec = np.linspace(start=0.0, stop=1.0, num=50)
+    t_vec = np.linspace(start=0.0, stop=1.0, num=51)
     u_mat = np.zeros((len(t_vec), len(x_vec)))
     u_0 = lambda x: np.sin(x)
     for i in range(len(t_vec)):
@@ -109,5 +151,9 @@ if __name__ == '__main__':
     d.display()
 
     d = AnimationDisplayer(x_vec=x_vec, t_vec=t_vec, u_mat=u_mat)
+    d.display(x_min=0.0, x_max=5.0, t_min=0.0, t_max=1.0)
+    d.display()
+
+    d = VtkDisplayer(x_vec=x_vec, t_vec=t_vec, u_mat=u_mat, filename='u')
     d.display(x_min=0.0, x_max=5.0, t_min=0.0, t_max=1.0)
     d.display()
